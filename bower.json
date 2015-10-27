@@ -20,11 +20,11 @@
     "specs"
   ],
   "dependencies": {
-    "angular": "1.2.x",
-    "angular-mocks": "~1.2.x",
-    "moment": "~2.6.0",
-    "jquery": "1.10.2",
-    "lodash": "2.4.1",
+    "angular": "^1.3.0",
+    "angular-mocks": "^1.3.x",
+    "moment": "^2.6.0",
+    "jquery": "^1.10.2",
+    "ng-lodash": "~0.3.0",
     "rrule": "~2.1.0"
   }
 }

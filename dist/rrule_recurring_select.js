@@ -1,4 +1,4 @@
-angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [function() {
+angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSelect', [function(lodash) {
   return {
     restrict: 'E',
     scope: {
@@ -15,7 +15,7 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
         scope.selectedMonthFrequency = 'day_of_month';
         scope.resetData();
         scope.$watch(scope.currentRule, scope.ruleChanged);
-        if(!_.isEmpty(scope.rule))
+        if(!lodash.isEmpty(scope.rule))
           scope.parseRule(scope.rule);
         else
           scope.calculateRRule();
@@ -35,7 +35,7 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
         scope.monthDays = [];
         scope.yearMonthDays = [];
 
-        _.times(31, function(index) {
+        lodash.times(31, function(index) {
           var day = { day: index + 1, value: index + 1, selected: false }
           scope.monthDays.push(day);
           scope.yearMonthDays.push(day);
@@ -52,8 +52,8 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
       scope.initMonthlyWeeklyDays = function() {
         scope.monthWeeklyDays = [];
 
-        _.times(4, function(index) {
-          var days = _.map(scope.daysOfWeek(), function(dayOfWeek){
+        lodash.times(4, function(index) {
+          var days = lodash.map(scope.daysOfWeek(), function(dayOfWeek){
             dayOfWeek.value = dayOfWeek.value.nth(index + 1);
             return dayOfWeek;
           });
@@ -126,7 +126,7 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
             scope.calculateYearlyRRule();
         }
 
-        if(!_.isUndefined(scope.rule))
+        if(!lodash.isUndefined(scope.rule))
           scope.rule = scope.recurrenceRule.toString();
       };
 
@@ -217,7 +217,7 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
 
         scope.interval = scope.recurrenceRule.options.interval;
 
-        scope.selectedFrequency = _.select(scope.frequencies, function(frequency) {
+        scope.selectedFrequency = lodash.select(scope.frequencies, function(frequency) {
           return frequency.rruleType == scope.recurrenceRule.options.freq;
         })[0];
 
@@ -232,16 +232,16 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
       scope.initFromWeeklyRule = function() {
         var ruleSelectedDays = scope.recurrenceRule.options.byweekday;
 
-        _.each(scope.weekDays, function(weekDay) {
-          if (_.contains(ruleSelectedDays, weekDay.value.weekday))
+        lodash.each(scope.weekDays, function(weekDay) {
+          if (lodash.contains(ruleSelectedDays, weekDay.value.weekday))
             weekDay.selected = true;
         });
       };
 
       scope.initFromMonthlyRule = function() {
-        if(!_.isEmpty(scope.recurrenceRule.options.bymonthday) || !_.isEmpty(scope.recurrenceRule.options.bynmonthday))
+        if(!lodash.isEmpty(scope.recurrenceRule.options.bymonthday) || !lodash.isEmpty(scope.recurrenceRule.options.bynmonthday))
           scope.initFromMonthDays();
-        else if(!_.isEmpty(scope.recurrenceRule.options.bynweekday))
+        else if(!lodash.isEmpty(scope.recurrenceRule.options.bynweekday))
           scope.initFromMonthWeekDays();
       };
 
@@ -249,8 +249,8 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
         var ruleMonthDays = scope.recurrenceRule.options.bymonthday;
         scope.selectedMonthFrequency = 'day_of_month';
 
-        _.each(scope.monthDays, function(weekDay) {
-          if(_.contains(ruleMonthDays, weekDay.value))
+        lodash.each(scope.monthDays, function(weekDay) {
+          if(lodash.contains(ruleMonthDays, weekDay.value))
             weekDay.selected = true;
         });
 
@@ -262,12 +262,12 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
         var ruleWeekMonthDays = scope.recurrenceRule.options.bynweekday;
         scope.selectedMonthFrequency = 'day_of_week';
 
-        _.each(ruleWeekMonthDays, function(ruleArray) {
+        lodash.each(ruleWeekMonthDays, function(ruleArray) {
           var dayIndex = ruleArray[0];
           var weekIndex = ruleArray[1] - 1;
 
           var week = scope.monthWeeklyDays[weekIndex];
-          _.each(week, function(day) {
+          lodash.each(week, function(day) {
             if (day.value.weekday == dayIndex) {
               day.selected = true;
               return;
@@ -277,7 +277,7 @@ angular.module('rruleRecurringSelect', []).directive('rruleRecurringSelect', [fu
       };
 
       scope.ruleChanged = function() {
-        if (!_.isEmpty(scope.rule)) {
+        if (!lodash.isEmpty(scope.rule)) {
           scope.parseRule(scope.rule);
         }
       };
