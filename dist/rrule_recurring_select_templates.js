@@ -1,4 +1,5 @@
-angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSelect', [function(lodash) {
+angular.module('rruleRecurringSelect', ['ngLodash'])
+.directive('rruleRecurringSelect', function(lodash) {
   return {
     restrict: 'E',
     scope: {
@@ -146,9 +147,9 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
       };
 
       scope.calculateWeeklyRRule = function() {
-        var selectedDays = lodash(scope.weekDays).select(function(day) {
+        var selectedDays = lodash(scope.weekDays).filter(function(day) {
           return day.selected;
-        }).pluck('value').value();
+        }).map('value').value();
 
         scope.recurrenceRule = new RRule({
           freq: RRule.WEEKLY,
@@ -166,9 +167,9 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
       };
 
       scope.calculateDayOfMonthRRule = function() {
-        var selectedDays = lodash(scope.monthDays).select(function(day) {
+        var selectedDays = lodash(scope.monthDays).filter(function(day) {
           return day.selected;
-        }).pluck('value').value();
+        }).map('value').value();
 
         scope.recurrenceRule = new RRule({
           freq: RRule.MONTHLY,
@@ -179,9 +180,9 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
       };
 
       scope.calculateDayOfWeekRRule = function() {
-        var selectedDays = lodash(scope.monthWeeklyDays).flatten().select(function(day) {
+        var selectedDays = lodash(scope.monthWeeklyDays).flatten().filter(function(day) {
           return day.selected;
-        }).pluck('value').value();
+        }).map('value').value();
 
         scope.recurrenceRule = new RRule({
           freq: RRule.MONTHLY,
@@ -194,15 +195,15 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
       scope.calculateYearlyRRule = function() {
         var selectedMonths = lodash(scope.yearMonths).flatten().sortBy(function(month){
           return month.value;
-        }).select(function(month) {
+        }).filter(function(month) {
           return month.selected;
-        }).pluck('value').value();
+        }).map('value').value();
 
         var selectedDays = lodash(scope.yearMonthDays).flatten().sortBy(function(day){
           return day.value;
-        }).select(function(day) {
+        }).filter(function(day) {
           return day.selected;
-        }).pluck('value').value();
+        }).map('value').value();
 
         scope.recurrenceRule = new RRule({
           freq: RRule.YEARLY,
@@ -217,7 +218,7 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
 
         scope.interval = scope.recurrenceRule.options.interval;
 
-        scope.selectedFrequency = lodash.select(scope.frequencies, function(frequency) {
+        scope.selectedFrequency = lodash.filter(scope.frequencies, function(frequency) {
           return frequency.rruleType == scope.recurrenceRule.options.freq;
         })[0];
 
@@ -233,7 +234,7 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
         var ruleSelectedDays = scope.recurrenceRule.options.byweekday;
 
         lodash.each(scope.weekDays, function(weekDay) {
-          if (lodash.contains(ruleSelectedDays, weekDay.value.weekday))
+          if (lodash.includes(ruleSelectedDays, weekDay.value.weekday))
             weekDay.selected = true;
         });
       };
@@ -250,7 +251,7 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
         scope.selectedMonthFrequency = 'day_of_month';
 
         lodash.each(scope.monthDays, function(weekDay) {
-          if(lodash.contains(ruleMonthDays, weekDay.value))
+          if(lodash.includes(ruleMonthDays, weekDay.value))
             weekDay.selected = true;
         });
 
@@ -289,6 +290,6 @@ angular.module('rruleRecurringSelect', ['ngLodash']).directive('rruleRecurringSe
       scope.init();
     }
   }
-}], 'lodash');
+});
 
 angular.module("rrule.templates", []).run(["$templateCache", function($templateCache) {$templateCache.put("template/rrule_recurring_select.html","<div class=\"rrule-recurring-select\">\n  <h3>Repeat</h3>\n\n  <div class=\"frequency-type\">\n    <select ng-model=\"selectedFrequency\" ng-options=\"frequency as frequency.name for frequency in frequencies\" ng-change=\"resetData()\" required>\n    </select>\n  </div>\n\n  <div class=\"interval\">\n    Every <input type=\"text\" ng-model=\"interval\" ng-change=\"calculateRRule()\" /> {{selectedFrequency.type}}(s):\n  </div>\n\n  <div class=\"weekly\" ng-if=\"selectedFrequency.type == \'week\'\">\n    <ul>\n      <li ng-repeat=\"day in weekDays\" ng-click=\"toggleSelected(day)\" ng-class=\"{ selected: day.selected }\">\n        {{day.name}}\n      </li>\n    </ul>\n  </div>\n\n  <div class=\"monthly {{selectedMonthFrequency}}\" ng-if=\"selectedFrequency.type == \'month\'\">\n    <input type=\"radio\" ng-model=\"selectedMonthFrequency\" ng-click=\"selectMonthFrequency(\'day_of_month\')\" value=\"day_of_month\"/>Day of month\n    <input type=\"radio\" ng-model=\"selectedMonthFrequency\" ng-click=\"selectMonthFrequency(\'day_of_week\')\" value=\"day_of_week\"/>Day of week\n\n    <ul class=\"month-days\">\n      <li ng-repeat=\"day in monthDays\" ng-click=\"toggleSelected(day)\" ng-class=\"{ selected: day.selected }\" ng-if=\"selectedMonthFrequency == \'day_of_month\'\">\n        {{day.day}}\n      </li>\n    </ul>\n\n    <ul class=\"month-week-days\">\n      <li ng-repeat=\"week in monthWeeklyDays\" ng-if=\"selectedMonthFrequency == \'day_of_week\'\">\n        <ul class=\"week-days\">\n          <li class=\"week-index-title\">{{$index + 1}}{{weekOrdinals[$index]}}</li>\n          <li ng-repeat=\"day in week\" ng-click=\"toggleSelected(day)\" ng-class=\"{ selected: day.selected }\">\n            {{ day.name }}\n          </li>\n        </ul>\n      </li>\n    </ul>\n  </div>\n\n  <div class=\"yearly\" ng-if=\"selectedFrequency.type == \'year\'\">\n    <label for=\"yearMonth\">Months: </label>\n    <ul class=\'year-months\'>\n      <li ng-repeat=\"yearMonth in yearMonths\" class=\"year-month\">\n        <input type=\"checkbox\" value=\"yearMonth.value\" ng-checked=\"yearMonth.selected\" ng-click=\"toggleSelected(yearMonth)\" id=\"year-month-{{yearMonth.value}}\">\n        <label for=\"year-month-{{yearMonth.value}}\">{{ yearMonth.name }}</label>\n      </li>\n    </ul>\n    <!-- <select name=\"yearMonth\" ng-model=\"selectedYearMonth\" ng-options=\"yearMonth as yearMonth.name for yearMonth in yearMonths track by yearMonth.value\" ng-change=\"calculateRRule()\" required></select> -->\n    <br />\n    <label for=\"yearMonthDay\">Day of Month: </label>\n     <ul class=\'year-month-days\'>\n      <li ng-repeat=\"monthDay in yearMonthDays\" class=\"year-month-day\">\n        <input type=\"checkbox\" value=\"monthDay.value\" ng-checked=\"monthDay.selected\" ng-click=\"toggleSelected(monthDay)\" id=\"year-month-day-{{monthDay.value}}\">\n        <label for=\"year-month-day-{{monthDay.value}}\">{{ monthDay.day }}</label>\n      </li>\n    </ul>\n  </div>\n\n  <div class=\"actions\">\n    <hr />\n\n    <div class=\"summary\">\n      Summary: {{selectedFrequency.name}}\n      <div class=\"description\">\n        {{ recurrenceRule.toText() }}\n      </div>\n    </div>\n\n    <div class=\"button ok\" ng-if=\"showButtons\" ng-click=\"okClick()\">Ok</div>\n    <div class=\"button cancel\" ng-if=\"showButtons\" ng-click=\"cancelClick()\">Cancel</div>\n  </div>\n</div>\n");}]);
